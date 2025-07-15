@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作煩惱調查</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .question-page {
+            display: block;
+        }
+
+        .stats-page {
+            display: none;
+            max-width: 90vw;
+            width: 90vw;
+            height: 80vh;
+            max-height: 800px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #2c5530;
+            font-size: 24px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .bubble-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+            animation: float 6s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            word-wrap: break-word;
+            hyphens: auto;
+            padding: 20px;
+            line-height: 1.4;
+            font-size: 18px;
+        }
+
+        .bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(76, 175, 80, 0.4);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-15px) rotate(2deg); }
+            50% { transform: translateY(-5px) rotate(-2deg); }
+            75% { transform: translateY(-10px) rotate(1deg); }
+        }
+
+        .bubble:nth-child(2n) {
+            animation-delay: -2s;
+            background: linear-gradient(135deg, #2196F3, #42A5F5);
+        }
+
+        .bubble:nth-child(3n) {
+            animation-delay: -4s;
+            background: linear-gradient(135deg, #FF9800, #FFA726);
+        }
+
+        .bubble:nth-child(4n) {
+            animation-delay: -1s;
+            background: linear-gradient(135deg, #9C27B0, #BA68C8);
+        }
+
+        .bubble:nth-child(5n) {
+            animation-delay: -3s;
+            background: linear-gradient(135deg, #F44336, #EF5350);
+        }
+
+        .stats-title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 20px;
+            color: #2c5530;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .control-buttons {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        .password-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .password-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .password-input {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            margin: 15px 0;
+            width: 200px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .stats-page {
+                width: 95vw;
+                height: 85vh;
+            }
+            
+            .bubble {
+                font-size: 16px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container question-page" id="questionPage">
+        <h1>你最討厭/不願意的日常工作</h1>
+        <div class="input-group">
+            <textarea id="workAnswer" placeholder="請分享你最討厭或不願意做的日常工作..."></textarea>
+        </div>
+        <button class="btn" onclick="submitAnswer()">提交</button>
+    </div>
+
+    <div class="container stats-page" id="statsPage">
+        <div class="stats-title">你最討厭/不願意的日常工作統計</div>
+        <div class="bubble-container" id="bubbleContainer">
+        </div>
+        <div class="control-buttons">
+            <button class="btn btn-secondary" onclick="goBack()">返回</button>
+            <button class="btn btn-danger" onclick="showPasswordPopup()">重置</button>
+        </div>
+    </div>
+
+    <div class="password-popup" id="passwordPopup">
+        <div class="password-content">
+            <h3>請輸入密碼</h3>
+            <input type="password" class="password-input" id="passwordInput" placeholder="請輸入密碼">
+            <br>
+            <button class="btn" onclick="checkPassword()">確認</button>
+            <button class="btn btn-secondary" onclick="hidePasswordPopup()">取消</button>
+        </div>
+    </div>
+
+    <script>
+        let answers = JSON.parse(localStorage.getItem('workAnswers')) || [];
+
+        function submitAnswer() {
+            const answer = document.getElementById('workAnswer').value.trim();
+            if (answer === '') {
+                alert('請輸入回答');
+                return;
+            }
+
+            answers.push(answer);
+            localStorage.setItem('workAnswers', JSON.stringify(answers));
+            
+            document.getElementById('workAnswer').value = '';
+            showStats();
+        }
+
+        function showStats() {
+            document.getElementById('questionPage').style.display = 'none';
+            document.getElementById('statsPage').style.display = 'block';
+            
+            generateBubbles();
+        }
+
+        function generateBubbles() {
+            const container = document.getElementById('bubbleContainer');
+            container.innerHTML = '';
+
+            if (answers.length === 0) {
+                container.innerHTML = '<div style="color: #666; font-size: 18px; text-align: center; margin-top: 50%;">暫無資料</div>';
+                return;
+            }
+
+            const answerCount = {};
+            answers.forEach(answer => {
+                answerCount[answer] = (answerCount[answer] || 0) + 1;
+            });
+
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight;
+            const usedPositions = [];
+
+            Object.entries(answerCount).forEach(([answer, count]) => {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.textContent = answer;
+                
+                // 根據次數調整泡泡大小，現在基礎尺寸更大
+                const baseSize = 120;
+                const sizeMultiplier = Math.min(count * 0.4, 2.5);
+                const size = baseSize + (count - 1) * 40;
+                
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                bubble.style.fontSize = Math.min(18 + count * 3, 28) + 'px';
+                
+                let attempts = 0;
+                let validPosition = false;
+                
+                while (!validPosition && attempts < 50) {
+                    const x = Math.random() * (containerWidth - size);
+                    const y = Math.random() * (containerHeight - size);
+                    
+                    let overlap = false;
+                    for (let pos of usedPositions) {
+                        const distance = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
+                        if (distance < (size + pos.size) / 2 + 20) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!overlap) {
+                        bubble.style.left = x + 'px';
+                        bubble.style.top = y + 'px';
+                        usedPositions.push({ x, y, size });
+                        validPosition = true;
+                    }
+                    
+                    attempts++;
+                }
+                
+                if (!validPosition) {
+                    bubble.style.left = Math.random() * (containerWidth - size) + 'px';
+                    bubble.style.top = Math.random() * (containerHeight - size) + 'px';
+                }
+                
+                // 添加數量顯示
+                if (count > 1) {
+                    bubble.innerHTML = `${answer}<br><small style="font-size: 14px; opacity: 0.8;">(${count}次)</small>`;
+                }
+                
+                container.appendChild(bubble);
+            });
+        }
+
+        function goBack() {
+            document.getElementById('statsPage').style.display = 'none';
+            document.getElementById('questionPage').style.display = 'block';
+        }
+
+        function showPasswordPopup() {
+            document.getElementById('passwordPopup').style.display = 'flex';
+            document.getElementById('passwordInput').focus();
+        }
+
+        function hidePasswordPopup() {
+            document.getElementById('passwordPopup').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+        }
+
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === '0000') {
+                answers = [];
+                localStorage.removeItem('workAnswers');
+                hidePasswordPopup();
+                generateBubbles();
+                alert('資料已重置');
+            } else {
+                alert('密碼錯誤');
+            }
+        }
+
+        // 回車提交密碼
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // 頁面載入時檢查是否有資料
+        window.addEventListener('load', function() {
+            // 確保容器有正確的尺寸
+            setTimeout(function() {
+                if (answers.length > 0 && document.getElementById('statsPage').style.display === 'block') {
+                    generateBubbles();
+                }
+            }, 100);
+        });
+
+        // 視窗大小改變時重新生成泡泡
+        window.addEventListener('resize', function() {
+            if (document.getElementById('statsPage').style.display === 'block') {
+                setTimeout(generateBubbles, 100);
+            }
+        });
+    </script>
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDl5ysusrGA%2FJRoIVJ%2FFJbPmUrFczMhlh2Eure%2FAiFYByfnDG%2FvIuJnDMBg1Vq9Ue%2FP7GCZAKHFNbZgAULTtB0btfhHcG%2FZLWtNUpNTcd6mFiCRb52wUa8E0GckwODtwsk5wMcJzKuuKQfJ08ZS6QDaQk3rRmZ3v74tOt1TENxNmknKw3%2BIOeW%2FHiq32XCkECAU%2BcPmW6jjc7pEqGCEy4WC5rR1ELJOgJMLEHcOCxolc3YxClLRQK5IWrnDXbhY%2ByvAU6w3mnskC1KVJZOq%2FqbAT4ObT2eVaLr6EFxYRwMB9xVeeHdd7YNj99DZYoSG4NG6BN3eUVcC6ANKxumelqALU5apXzH7Cq9wyCFfkjB8C96ISFUku%2FMPf9bsxYdA%2FYuw0QLTMfcKr1ts6tKWmPDz1el6aYqx0aKPgri03%2FKHg5qWIdl2TXPPlQxqz51yfoyXTDqt41Tux7ZlPldAis%2BVhDT%2Bx8gL%2BL8mfUb4NYCbi25pTnay0XNTJ4yReobeVUHg%3D%3D";
+        window.__genspark_locale = "zh-TW";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDl5ysusrGA/JRoIVJ/FJbPmUrFczMhlh2Eure/AiFYByfnDG/vIuJnDMBg1Vq9Ue/P7GCZAKHFNbZgAULTtB0btfhHcG/ZLWtNUpNTcd6mFiCRb52wUa8E0GckwODtwsk5wMcJzKuuKQfJ08ZS6QDaQk3rRmZ3v74tOt1TENxNmknKw3+IOeW/Hiq32XCkECAU+cPmW6jjc7pEqGCEy4WC5rR1ELJOgJMLEHcOCxolc3YxClLRQK5IWrnDXbhY+yvAU6w3mnskC1KVJZOq/qbAT4ObT2eVaLr6EFxYRwMB9xVeeHdd7YNj99DZYoSG4NG6BN3eUVcC6ANKxumelqALU5apXzH7Cq9wyCFfkjB8C96ISFUku/MPf9bsxYdA/Yuw0QLTMfcKr1ts6tKWmPDz1el6aYqx0aKPgri03/KHg5qWIdl2TXPPlQxqz51yfoyXTDqt41Tux7ZlPldAis+VhDT+x8gL+L8mfUb4NYCbi25pTnay0XNTJ4yReobeVUHg==";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    
