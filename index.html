@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作調查</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1 class="title">工作</h1>
+            <div class="question-section">
+                <label for="workAnswer" class="question">你最討厭/不願意的日常工作</label>
+                <textarea 
+                    id="workAnswer" 
+                    placeholder="請分享您的想法..."
+                    rows="4"
+                ></textarea>
+            </div>
+            <button id="submitBtn" class="submit-btn">提交</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('submitBtn').addEventListener('click', async function() {
+            const answer = document.getElementById('workAnswer').value.trim();
+            
+            if (!answer) {
+                alert('請填寫您的答案');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ answer: answer })
+                });
+
+                if (response.ok) {
+                    window.location.href = '/statistics.html';
+                } else {
+                    alert('提交失敗，請稍後再試');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('提交失敗，請稍後再試');
+            }
+        });
+
+        // 按 Enter 鍵提交
+        document.getElementById('workAnswer').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                document.getElementById('submitBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>
+

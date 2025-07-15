@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作調查 - 統計結果</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1 class="title">統計結果</h1>
+            <div class="subtitle">你最討厭/不願意的日常工作</div>
+            
+            <div id="bubbleContainer" class="bubble-container">
+                <!-- 泡泡將在這裡動態生成 -->
+            </div>
+            
+            <div class="controls">
+                <button id="resetBtn" class="reset-btn">重置</button>
+                <button id="backBtn" class="back-btn">返回</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 密碼輸入模態框 -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3>請輸入密碼</h3>
+            <input type="password" id="passwordInput" placeholder="請輸入密碼">
+            <div class="modal-buttons">
+                <button id="confirmPassword" class="confirm-btn">確認</button>
+                <button id="cancelPassword" class="cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let bubbleData = [];
+
+        // 載入統計資料
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/statistics');
+                const data = await response.json();
+                bubbleData = data.statistics || [];
+                renderBubbles();
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // 渲染泡泡
+        function renderBubbles() {
+            const container = document.getElementById('bubbleContainer');
+            container.innerHTML = '';
+
+            if (bubbleData.length === 0) {
+                container.innerHTML = '<div class="no-data">暫無資料</div>';
+                return;
+            }
+
+            // 計算泡泡大小
+            const maxCount = Math.max(...bubbleData.map(item => item.count));
+            const minSize = 60;
+            const maxSize = 200;
+
+            bubbleData.forEach((item, index) => {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                
+                // 根據數量計算大小
+                const size = minSize + (maxSize - minSize) * (item.count / maxCount);
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                
+                // 隨機位置
+                const containerRect = container.getBoundingClientRect();
+                const maxX = Math.max(0, containerRect.width - size);
+                const maxY = Math.max(0, containerRect.height - size);
+                
+                bubble.style.left = Math.random() * maxX + 'px';
+                bubble.style.top = Math.random() * maxY + 'px';
+                
+                // 內容
+                bubble.innerHTML = `
+                    <div class="bubble-text">${item.answer}</div>
+                    <div class="bubble-count">${item.count}</div>
+                `;
+                
+                // 動畫延遲
+                bubble.style.animationDelay = (index * 0.2) + 's';
+                
+                container.appendChild(bubble);
+            });
+        }
+
+        // 重置按鈕事件
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            document.getElementById('passwordModal').style.display = 'flex';
+            document.getElementById('passwordInput').focus();
+        });
+
+        // 確認密碼
+        document.getElementById('confirmPassword').addEventListener('click', async function() {
+            const password = document.getElementById('passwordInput').value;
+            
+            if (password === '0000') {
+                try {
+                    const response = await fetch('/api/reset', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ password: password })
+                    });
+
+                    if (response.ok) {
+                        alert('重置成功');
+                        loadStatistics();
+                    } else {
+                        alert('重置失敗');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('重置失敗');
+                }
+                
+                document.getElementById('passwordModal').style.display = 'none';
+                document.getElementById('passwordInput').value = '';
+            } else {
+                alert('密碼錯誤');
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        });
+
+        // 取消密碼
+        document.getElementById('cancelPassword').addEventListener('click', function() {
+            document.getElementById('passwordModal').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+        });
+
+        // 返回按鈕
+        document.getElementById('backBtn').addEventListener('click', function() {
+            window.location.href = '/';
+        });
+
+        // 密碼輸入框按 Enter 鍵
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('confirmPassword').click();
+            }
+        });
+
+        // 頁面載入時獲取統計資料
+        window.addEventListener('load', loadStatistics);
+
+        // 定期更新統計資料
+        setInterval(loadStatistics, 5000);
+    </script>
+</body>
+</html>
+
